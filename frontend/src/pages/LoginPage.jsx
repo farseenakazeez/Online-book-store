@@ -1,7 +1,59 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BookOpen } from "lucide-react";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setCredentials } from ".././slices/authSlice";
+
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      setMessage("Please enter email and password");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        console.log("Login successful:", data);
+
+        // Store logged-in user in Redux
+        dispatch(setCredentials(data));
+
+        // Go to homepage
+        navigate("/");
+      } else {
+        setMessage(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
   return (
     <div className="min-h-screen bg-[#F8F5F0] flex items-center justify-center px-4 py-10">
 
@@ -47,30 +99,39 @@ export default function LoginPage() {
             Continue your reading journey
           </p>
 
-          <form className="space-y-5">
+          <form onSubmit={submitHandler} className="space-y-5">
             <div className="flex flex-col gap-4 items-center ">
-                 <input
-              type="email"
-              placeholder="Email Address"
-              className="w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
-            />
+              <input value={email} onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                placeholder="Email Address"
+                className="w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
+              />
 
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
-            />
+              <input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                placeholder="Password"
+                className="w-[320px] border border-gray-300 rounded-xl px-4 py-3"
+              />
 
-            <button
-              className="w-[320px] bg-[#6F4E37] hover:bg-[#5A3D2B] text-white py-3 rounded-xl font-semibold transition"
-            >
-              Login
-            </button>
+              {message && (
+                <p className="text-red-500 text-sm text-center">
+                  {message}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className="w-[320px] bg-[#6F4E37] hover:bg-[#5A3D2B] text-white py-3 rounded-xl font-semibold transition"
+              >
+                Login
+              </button>
 
 
             </div>
 
-           
+
           </form>
 
           <p className="text-center mt-6 text-gray-600">

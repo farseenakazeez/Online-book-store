@@ -1,7 +1,49 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BookOpen } from "lucide-react";
+import { useState } from "react";
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("customer");
+  const [message, setMessage] = useState("");
+
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    alert("Register clicked");
+    console.log("register clicked");
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            role,
+          }),
+        });
+      const data = await res.json();
+      if (res.ok) {
+        console.log(data);
+        navigate("/login");
+      } else {
+        setMessage(data.message || "Registration failed");
+      }
+    }
+    catch (error) {
+      console.log(error);
+      setMessage("Something went wrong");
+    }
+  };
   return (
     <div className="min-h-screen bg-[#F8F5F0] flex items-center justify-center px-4 py-10">
 
@@ -47,47 +89,66 @@ export default function RegisterPage() {
             Start your reading journey today
           </p>
 
-          <form className="space-y-4">
+          <form onSubmit={submitHandler} className="space-y-4">
             <div className=" flex flex-col gap-4 items-center ">
 
-            <input
-              type="text"
-              placeholder="Full Name"
-              className="w-[320px] border border-gray-300 rounded-xl   pl-5  py-3 focus:outline-none focus:border-[#6F4E37]"
-            />
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className=" w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
+              />
 
-            <input
-              type="email"
-              placeholder="Email Address"
-              className=" w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
-            />
 
-            <input
-              type="password"
-              placeholder="Password"
-              className="  w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
-            />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email Address"
+                className=" w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
+              />
 
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              className=" w-[320px]    border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
-            />
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
+              />
 
-            <select
-              className=" w-[320px]   border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
-            >
-              <option value="">Select Role</option>
-              <option value="customer">Customer</option>
-              <option value="seller">Seller</option>
-            </select>
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
+                className="w-[320px] border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
+              />
 
-            <button
-              type="submit"
-              className=" w-[320px] bg-[#6F4E37] hover:bg-[#5A3D2B] text-white py-3 rounded-xl font-semibold transition duration-300"
-            >
-              Create Account
-            </button>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className=" w-[320px]   border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6F4E37]"
+              >
+                <option value="">Select Role</option>
+                <option value="customer">Customer</option>
+                <option value="seller">Seller</option>
+              </select>
+
+              {message && (
+                <p className="text-red-500 text-center mb-4">
+                  {message}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className=" w-[320px] bg-[#6F4E37] hover:bg-[#5A3D2B] text-white py-3 rounded-xl font-semibold transition duration-300"
+              >
+                Create Account
+              </button>
             </div>
 
           </form>
